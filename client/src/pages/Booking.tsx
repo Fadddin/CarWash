@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { auth } from '../firebase-config';
 
-// Define the type for a booking slot
+
 interface BookingSlot {
   id: number;
   time: string;
   isBooked: boolean;
 }
 
-// Define the type for form data
+
 interface FormData {
   name: string;
   phoneNumber: string;
@@ -22,7 +23,6 @@ interface FormData {
 const Booking: React.FC = () => {
   const [slots, setSlots] = useState<BookingSlot[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [selected, setSelected] = useState<boolean>(false);
 
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>({
@@ -36,11 +36,11 @@ const Booking: React.FC = () => {
   });
 
   useEffect(() => {
-    // Function to fetch booking slots
+
     const fetchSlots = async () => {
       try {
         const response = await axios.get<{ slots: BookingSlot[] }>('http://localhost:7070/v1/api/booking/slots');
-        // Check if the response contains the slots array
+
         if (Array.isArray(response.data.slots)) {
           setSlots(response.data.slots);
         } else {
@@ -67,22 +67,38 @@ const Booking: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log(formData);
+
+    const user = auth.currentUser;
+    console.log(user?.email);
+
+
+    if (!user) {
+      alert('Please sign in to book a slot');
+      return;
+    }
+
+
+    const currentDate = new Date();
+    const formattedDate = `${(currentDate.getMonth() + 1).toString().padStart(2, '0')}/${currentDate.getDate().toString().padStart(2, '0')}/${currentDate.getFullYear()}`;
     
 
     try {
       // Send the booking time and today's date
-      await axios.post('http://localhost:7070/v1/api/booking/time', {
-        bookingTime: formData.bookingTime,
-        bookingDate: formData.bookingDate
+      await axios.post('http://localhost:7070/v1/api/booking/book', {
+        date: formattedDate,
+        time: formData.bookingTime
       });
 
       // Send the rest of the information
-      await axios.post('http://localhost:7070/v1/api/booking/info', {
+      await axios.post('http://localhost:7070/v1/api/booking/save', {
+        bookingTime: formData.bookingTime,
+        bookingDate: formData.bookingDate,
         name: formData.name,
         phoneNumber: formData.phoneNumber,
         address: formData.address,
         carNumber: formData.carNumber,
-        carName: formData.carName
+        carName: formData.carName,
+        user: user.email
       });
 
       alert('Booking submitted successfully');
@@ -98,12 +114,18 @@ const Booking: React.FC = () => {
   if (error) {
     return <p>{error}</p>;
   }
+  const currentDate = new Date();
+  const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1}/${currentDate.getFullYear()}`;
+
+  // console.log(formattedDate, formData.bookingTime);
+
 
   return (
     <div>
-      <h1>Booking Slots</h1>
+      <div className='m-8 text-2xl font-bold '> BOOK YOUR SLOT FOR {formattedDate}</div>
       <form onSubmit={handleSubmit} className='m-8'>
         <div className='grid grid-cols-1 gap-4'>
+          
           <input
             type='text'
             name='name'
@@ -163,22 +185,23 @@ const Booking: React.FC = () => {
           />
         </div>
 
-      <div className='m-8 border grid grid-cols-5'>
-        {slots.map(slot => (
-          <button
-            key={slot.id}
-            disabled={slot.isBooked}
-            className={`m-4 px-4 py-2 rounded-md shadow-md text-center ${slot.isBooked ? 'bg-slate-700 text-white line-through' : 'bg-slate-200'}`}
-            onClick={() => setFormData({ ...formData, bookingTime: slot.time }) }
-          >
-            {slot.time}
-          </button>
-        ))}
-      </div>
-      <div className='m-8 text-xl font-bold h-10'>
-        {formData.bookingTime ? `Time Selected as ${formData.bookingTime}`: ''}
-      </div>
-      <button type='submit' className='mt-4 px-4 py-2 bg-blue-500 text-white rounded-md'>
+        <div className='m-8 border grid grid-cols-5'>
+          {slots.map(slot => (
+            <button
+              type='button'
+              key={slot.id}
+              disabled={slot.isBooked}
+              className={`m-4 px-4 py-2 rounded-md shadow-md text-center ${slot.isBooked ? 'bg-slate-700 text-white line-through' : 'bg-slate-200'}`}
+              onClick={() => setFormData({ ...formData, bookingTime: slot.time })}
+            >
+              {slot.time}
+            </button>
+          ))}
+        </div>
+        <div className='m-8 text-xl font-bold h-10'>
+          {formData.bookingTime ? `Time Selected as ${formData.bookingTime}` : ''}
+        </div>
+        <button type='submit' className='mt-4 px-4 py-2 bg-blue-500 text-white rounded-md'>
           Submit
         </button>
       </form>

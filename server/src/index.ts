@@ -25,7 +25,7 @@ mongoose.connect(process.env.MONGO_URI!)
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.log(err));
 
-cron.schedule('13 3 * * *', async () => {
+cron.schedule('0 0 * * *', async () => {
     const today = new Date();
     // const tomorrow = new Date(today);
     // tomorrow.setDate(today.getDate() + 1);

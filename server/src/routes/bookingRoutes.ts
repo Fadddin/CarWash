@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import Slot from '../model/Slots';
+import Bookings from '../model/Bookings';
 
 const router = express.Router();
 
@@ -44,6 +45,26 @@ try {
         message: error
     });
 }
+})
+
+router.post('/save', async (req, res) => {
+   const { bookingTime, bookingDate,name,phoneNumber,address,carNumber,carName,user} = req.body;
+
+   try {
+    const newBooking = new Bookings({bookingTime, bookingDate,name,phoneNumber,address,carNumber,carName,user});
+    await newBooking.save();
+
+    res.status(201).json({
+        message: 'Booking saved successfully',
+        info : newBooking
+    });
+
+   } catch (error) {
+      res.status(400).json({
+        message: error
+      })
+   }
+
 })
 
 export const bookingRoutes = router;

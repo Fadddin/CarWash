@@ -1,56 +1,57 @@
 import express, { Request, Response } from 'express';
 import User from '../model/User';
+import Bookings from '../model/Bookings';
 
 const router = express.Router();
 
 
 router.post('/signup', async (req, res) => {
-    const {name , email, password , phone} = req.body;
+    const { name, email, password, phone } = req.body;
 
-    try {    
+    try {
 
-        const newUser = new User({name, email, password, phone});
+        const newUser = new User({ name, email, password, phone });
         await newUser.save();
 
         res.status(201).json({
-            message : 'User created successfully'
+            message: 'User created successfully'
         })
 
     } catch (error) {
-        
+
         res.status(500).json({
-            message : error
+            message: error
         })
     }
 })
 
 router.post('/signin', async (req, res) => {
-    const {email, password} = req.body;
+    const { email, password } = req.body;
 
-    try {    
+    try {
 
-        const user = await User.findOne({ email , password});
+        const user = await User.findOne({ email, password });
 
-        if(user) {
+        if (user) {
             res.status(201).json({
-                message : 'Signed in successfully'
+                message: 'Signed in successfully'
             })
         } else {
             res.status(404).json({
-                message : 'User not found'
+                message: 'User not found'
             })
         }
 
     } catch (error) {
-        
+
         res.status(500).json({
-            message : error
+            message: error
         })
     }
 })
 
 router.get('/all', async (req, res) => {
-    try {    
+    try {
 
         const users = await User.find();
 
@@ -59,11 +60,32 @@ router.get('/all', async (req, res) => {
         })
 
     } catch (error) {
-        
+
         res.status(500).json({
-            message : error
+            message: error
         })
     }
+})
+
+router.get('/cart', async (req, res) => {
+    
+    const user = req.query.user as string;
+
+    try {
+
+        const bookings = await Bookings.find({ user: user })
+
+        res.status(201).json({
+            bookings
+        })
+
+    } catch (error) {
+
+        res.status(400).json({
+            message: error
+        })
+    }
+
 })
 
 

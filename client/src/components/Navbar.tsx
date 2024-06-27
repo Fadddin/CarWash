@@ -27,6 +27,9 @@ const Navbar: React.FC = () => {
         <ul className='flex gap-x-6 items-center font-mono'>
           
           <li>
+            <Link className='hover:text-blue-700' to="/booking">Book</Link>
+          </li>
+          <li>
             <Link className='hover:text-blue-700' to="/contactus">Contact Us</Link>
           </li>
           {!user ? (
@@ -39,9 +42,15 @@ const Navbar: React.FC = () => {
               </li>
             </>
           ) : (
-            <li>
-              <button onClick={handleSignOut}>Sign Out</button>
-            </li>
+            <>
+              <li>
+                <Link className='hover:text-blue-600' to="/cart">My Bookings</Link>
+              </li>
+              <li>
+                <button onClick={handleSignOut}>Sign Out</button>
+              </li>
+            </>
+
           )}
         </ul>
       </div>
