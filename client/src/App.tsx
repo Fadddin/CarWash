@@ -7,6 +7,7 @@ import SignIn from './pages/SignIn';
 import ContactUs from './pages/ContactUs';
 import ProtectedRoute from './utils/ProtectedRoute';
 import Navbar from './components/Navbar';
+import Booking from './pages/Booking';
 
 const App: React.FC = () => {
   return (
@@ -21,6 +22,14 @@ const App: React.FC = () => {
             element={
               <ProtectedRoute>
                 <ContactUs />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/booking"
+            element={
+              <ProtectedRoute>
+                <Booking />
               </ProtectedRoute>
             }
           />
